@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Easing,
   LayoutAnimation,
   Pressable,
   StatusBar,
@@ -10,17 +9,12 @@ import {
   Text,
   View,
 } from "react-native";
-import Animated, {
-  LightSpeedOutLeft,
-  LinearTransition,
-} from "react-native-reanimated";
+import Animated, { LightSpeedOutLeft } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 // @ts-ignore
 import SwipeableFlatList from "react-native-swipeable-list";
 // @ts-ignore
-import { v4 as uuidv4 } from "uuid";
 import { useFetch } from "@services/backgroundTask";
-import { storage } from "@services/storage";
 
 const darkColors = {
   background: "#121212",
@@ -37,9 +31,9 @@ const colorEmphasis = {
   disabled: 0.38,
 };
 
-const Item = ({ item, keys }: { item: any; keys?: any }) => {
+const Item = ({ item }: { item: any }) => {
   return (
-    <Animated.View key={keys} style={styles.item} exiting={LightSpeedOutLeft}>
+    <Animated.View style={styles.item} exiting={LightSpeedOutLeft}>
       <View style={styles.avatar} />
       <View style={styles.messageContainer}>
         <Text style={styles.name} numberOfLines={1}>
@@ -67,10 +61,11 @@ const HomeScreen = () => {
     fetchData,
   } = useFetch(
     // eslint-disable-next-line max-len
-    "https://newsapi.org/v2/everything?page=1&pageSize=20&domains=bbc.co.uk,techcrunch.com,engadget.com&apiKey=8d8e62acd6c248109eafe31fef011b3e",
+    "https://newsapi.org/v2/everything?page=1&pageSize=40&domains=bbc.co.uk,techcrunch.com,engadget.com&apiKey=8d8e62acd6c248109eafe31fef011b3e",
   );
 
   const [datas, setDatas] = useState(newsData || []);
+  const [currentData, setCurrentData] = useState([]);
   const [pinned, setPinned] = useState(null);
   const timerRef = useRef();
 
@@ -87,42 +82,43 @@ const HomeScreen = () => {
   };
 
   const startTimer = useCallback(() => {
-    timerRef.current = setTimeout(() => {
-      const isStored = storage.getString("newsData");
-      if (!isStored) return;
-      const stored = JSON.parse(isStored);
+    timerRef.current = setInterval(() => {
+      if (datas.length === 0) return;
       const randomNews: any = [];
+      const localData = datas;
+
       for (let i = 0; i < 5; i++) {
-        randomNews.push(
-          stored.articles[Math.floor(Math.random() * stored.articles.length)],
-        );
+        const index = Math.floor(Math.random() * localData.length);
+        randomNews.push(localData[index]);
+        localData.splice(index, 1);
       }
-      setDatas([...randomNews, ...datas]);
+
+      setDatas(localData);
+      setCurrentData([...randomNews, ...currentData]);
       LayoutAnimation.configureNext(layoutAnimConfig);
     }, 5000);
-  }, [datas]);
+  }, [currentData, datas]);
 
   useEffect(() => {
     if (newsData) {
-      const storedData = newsData;
-      const removedData =
-        storedData.length > 10 ? storedData.splice(0, 10) : storedData;
-      setDatas(removedData);
+      setDatas(newsData);
+      setCurrentData(newsData.splice(0, 10));
     }
   }, [newsData]);
 
   useEffect(() => {
-    // startTimer();
+    if (datas) {
+      clearInterval(timerRef.current);
+      startTimer();
+    }
 
-    return () => clearTimeout(timerRef.current);
-  }, [startTimer]);
+    return () => clearInterval(timerRef.current);
+  }, [datas, startTimer, fetchData]);
 
   const deleteItem = (itemId: any) => {
-    const newState = [...datas];
-    const filteredState = newState.filter(
-      (item) => item.publishedAt !== itemId,
-    );
-    setDatas(filteredState);
+    const newState = [...currentData];
+    const filteredState = newState.filter((item) => item.id !== itemId);
+    setCurrentData(filteredState);
     LayoutAnimation.configureNext(layoutAnimConfig);
   };
 
@@ -136,7 +132,7 @@ const HomeScreen = () => {
     LayoutAnimation.configureNext(layoutAnimConfig);
   };
 
-  const QuickActions = (index: any, qaItem: any) => {
+  const QuickActions = (qaItem: any) => {
     return (
       <View style={styles.qaContainer}>
         <View style={[styles.button, styles.button2Text]}>
@@ -145,7 +141,7 @@ const HomeScreen = () => {
           </Pressable>
         </View>
         <View style={[styles.button, styles.button3Text]}>
-          <Pressable onPress={() => deleteItem(qaItem.publishedAt)}>
+          <Pressable onPress={() => deleteItem(qaItem.id)}>
             <Text style={[styles.buttonText, styles.button3Text]}>Delete</Text>
           </Pressable>
         </View>
@@ -153,7 +149,7 @@ const HomeScreen = () => {
     );
   };
 
-  if (!datas || isPending) return <Text>Loading...</Text>;
+  if (!currentData || isPending) return <Text>Loading...</Text>;
 
   return (
     <SafeAreaView>
@@ -164,13 +160,11 @@ const HomeScreen = () => {
           {pinned ? <Item item={pinned} /> : null}
         </View>
         <SwipeableFlatList
-          keyExtractor={(item: any, index: any) => index.toString()}
-          data={datas}
-          renderItem={({ item, index }: { item: any; index: any }) => (
-            <Item keys={index} item={item} />
-          )}
+          keyExtractor={(item: any) => item.id.toString()}
+          data={currentData}
+          renderItem={({ item }: { item: any }) => <Item item={item} />}
           maxSwipeDistance={160}
-          renderQuickActions={({ index, item }) => QuickActions(index, item)}
+          renderQuickActions={({ item }: { item: any }) => QuickActions(item)}
           contentContainerStyle={styles.contentContainerStyle}
           shouldBounceOnMount={true}
           ItemSeparatorComponent={renderItemSeparator}
