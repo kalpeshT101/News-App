@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { storage } from "./storage";
-import {v4 as uuid} from 'uuid'
+import { v4 as uuid } from 'uuid'
 
 export const useFetch = (url) => {
   const [data, setData] = useState(null);
@@ -8,7 +8,6 @@ export const useFetch = (url) => {
   const [error, setError] = useState(null);
 
   const fetchData = async () => {
-    console.log('called')
     const storedData = storage.getString("newsData");
     if (storedData && JSON.parse(storedData).length > 0) {
       const d = JSON.parse(storedData)

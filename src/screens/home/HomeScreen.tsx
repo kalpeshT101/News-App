@@ -2,19 +2,39 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Dimensions,
   LayoutAnimation,
+  Platform,
   Pressable,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  UIManager,
   View,
 } from "react-native";
-import Animated, { LightSpeedOutLeft } from "react-native-reanimated";
+import LinearGradient from "react-native-linear-gradient";
+import Animated, {
+  FadeInDown,
+  LightSpeedOutLeft,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { createShimmerPlaceholder } from "react-native-shimmer-placeholder";
+import Svg, { Path } from "react-native-svg";
 // @ts-ignore
 import SwipeableFlatList from "react-native-swipeable-list";
 // @ts-ignore
 import { useFetch } from "@services/backgroundTask";
+import { storage } from "@services/storage";
+
+if (Platform.OS === "android") {
+  if (UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
+}
+
+const windowWidth = Dimensions.get("window").width;
+const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient);
 
 const darkColors = {
   background: "#121212",
@@ -54,6 +74,29 @@ function renderItemSeparator() {
   return <View style={styles.itemSeparator} />;
 }
 
+const SvgComponent = () => (
+  <Svg
+    xmlSpace="preserve"
+    width={16}
+    height={16}
+    fill="#fff"
+    stroke="#fff"
+    viewBox="0 0 330 330"
+  >
+    <Path d="m325.606 229.393-150.004-150a14.997 14.997 0 0 0-21.213.001l-149.996 150c-5.858 5.858-5.858 15.355 0 21.213 5.857 5.857 15.355 5.858 21.213 0l139.39-139.393 139.397 139.393A14.953 14.953 0 0 0 315 255a14.95 14.95 0 0 0 10.607-4.394c5.857-5.858 5.857-15.355-.001-21.213z" />
+  </Svg>
+);
+
+const Fetch = () => (
+  <Svg width={24} height={24} fill="none" stroke="#fff" viewBox="0 0 24 24">
+    <Path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M14.393 5.374c3.632 1.332 5.505 5.378 4.183 9.038a7.008 7.008 0 0 1-5.798 4.597m0 0 1.047-1.754m-1.047 1.754 1.71.991m-4.881-1.374c-3.632-1.332-5.505-5.378-4.183-9.038a7.008 7.008 0 0 1 5.798-4.597m0 0-1.047 1.754m1.047-1.754L9.512 4"
+    />
+  </Svg>
+);
+
 const HomeScreen = () => {
   const {
     data: newsData,
@@ -61,16 +104,18 @@ const HomeScreen = () => {
     fetchData,
   } = useFetch(
     // eslint-disable-next-line max-len
-    "https://newsapi.org/v2/everything?page=1&pageSize=40&domains=bbc.co.uk,techcrunch.com,engadget.com&apiKey=8d8e62acd6c248109eafe31fef011b3e",
+    "https://newsapi.org/v2/everything?page=1&pageSize=20&domains=bbc.co.uk,techcrunch.com,engadget.com&apiKey=8d8e62acd6c248109eafe31fef011b3e",
   );
 
   const [datas, setDatas] = useState(newsData || []);
   const [currentData, setCurrentData] = useState([]);
   const [pinned, setPinned] = useState(null);
   const timerRef = useRef();
+  const [scrollRef, setScrollRef] = useState(false);
+  const ref = useRef(null);
 
   const layoutAnimConfig = {
-    duration: 500,
+    duration: 300,
     update: {
       type: LayoutAnimation.Types.easeInEaseOut,
     },
@@ -96,7 +141,31 @@ const HomeScreen = () => {
       setDatas(localData);
       setCurrentData([...randomNews, ...currentData]);
       LayoutAnimation.configureNext(layoutAnimConfig);
-    }, 5000);
+    }, 10000);
+    //
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentData, datas]);
+
+  const fetchNews = useCallback(async () => {
+    clearInterval(timerRef.current);
+    if (datas.length === 0) {
+      storage.clearAll();
+      await fetchData();
+    } else {
+      const randomNews: any = [];
+      const localData = datas;
+
+      for (let i = 0; i < 5; i++) {
+        const index = Math.floor(Math.random() * localData.length);
+        randomNews.push(localData[index]);
+        localData.splice(index, 1);
+      }
+
+      setDatas(localData);
+      setCurrentData([...randomNews, ...currentData]);
+      LayoutAnimation.configureNext(layoutAnimConfig);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentData, datas]);
 
   useEffect(() => {
@@ -115,6 +184,12 @@ const HomeScreen = () => {
     return () => clearInterval(timerRef.current);
   }, [datas, startTimer, fetchData]);
 
+  useEffect(() => {
+    if (scrollRef) {
+      clearInterval(timerRef.current);
+    }
+  }, [scrollRef]);
+
   const deleteItem = (itemId: any) => {
     const newState = [...currentData];
     const filteredState = newState.filter((item) => item.id !== itemId);
@@ -129,6 +204,9 @@ const HomeScreen = () => {
 
   const pinItem = (item: any) => {
     setPinned(item);
+    const newState = [...currentData];
+    const filteredState = newState.filter((items) => items.id !== item.id);
+    setCurrentData(filteredState);
     LayoutAnimation.configureNext(layoutAnimConfig);
   };
 
@@ -149,16 +227,43 @@ const HomeScreen = () => {
     );
   };
 
-  if (!currentData || isPending) return <Text>Loading...</Text>;
+  if (!currentData || isPending)
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContatiner}>
+          <Text style={styles.headerText}>News Feed</Text>
+          {Array(10)
+            .fill("")
+            .map((_, idx) => (
+              <ShimmerPlaceholder
+                key={idx}
+                style={styles.shimmer}
+                width={windowWidth - 20}
+                height={100}
+                shimmerColors={["#3a3a3a", "#4a4a4a"]}
+              />
+            ))}
+        </View>
+      </SafeAreaView>
+    );
 
   return (
-    <SafeAreaView>
-      <StatusBar barStyle="dark-content" />
-      <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerText}>Latest News</Text>
-          {pinned ? <Item item={pinned} /> : null}
-        </View>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerText}>News Feed</Text>
+        <Pressable style={styles.fetch} onPress={fetchNews}>
+          <Fetch />
+        </Pressable>
+      </View>
+      {pinned ? <Item item={pinned} /> : null}
+      <ScrollView
+        style={styles.container}
+        onMomentumScrollBegin={() => setScrollRef(true)}
+        onMomentumScrollEnd={() => setScrollRef(false)}
+        bounces={false}
+        ref={ref}
+      >
         <SwipeableFlatList
           keyExtractor={(item: any) => item.id.toString()}
           data={currentData}
@@ -169,23 +274,52 @@ const HomeScreen = () => {
           shouldBounceOnMount={true}
           ItemSeparatorComponent={renderItemSeparator}
         />
-      </View>
+      </ScrollView>
+      <Animated.View style={styles.scrollTopButton} entering={FadeInDown}>
+        <Pressable
+          onPress={async () => {
+            // storage.clearAll();
+            // await fetchData();
+            ref?.current?.scrollTo({ x: 0, y: 0, animated: true });
+          }}
+        >
+          <SvgComponent />
+        </Pressable>
+      </Animated.View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  loadingContatiner: {
+    paddingHorizontal: 10,
+    paddingTop: 20,
+    flex: 1,
+    gap: 10,
+  },
+  shimmer: {
+    borderRadius: 8,
+  },
   container: {
     backgroundColor: "#121212",
+    flex: 1,
   },
   headerContainer: {
     justifyContent: "center",
     alignItems: "center",
     paddingTop: 20,
+    flexDirection: "row",
+    position: "relative",
+  },
+  fetch: {
+    position: "absolute",
+    right: 25,
+    top: 25,
   },
   headerText: {
-    fontSize: 30,
+    fontSize: 24,
     fontWeight: "800",
+    textAlign: "center",
     color: darkColors.onBackground,
     opacity: colorEmphasis.high,
   },
@@ -213,6 +347,14 @@ const styles = StyleSheet.create({
     textShadowColor: darkColors.secondary,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 4,
+  },
+  scrollTopButton: {
+    backgroundColor: "gray",
+    padding: 10,
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    borderRadius: 999,
   },
   text: {
     fontSize: 10,

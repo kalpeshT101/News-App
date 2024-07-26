@@ -1,7 +1,7 @@
 import React from "react";
 import { LogBox, StatusBar, useColorScheme } from "react-native";
 import "react-native-gesture-handler";
-import SplashScreen from "react-native-splash-screen";
+import BootSplash from "react-native-bootsplash";
 import { isAndroid } from "@freakycoder/react-native-helpers";
 /**
  * ? Local Imports
@@ -21,16 +21,17 @@ const App = () => {
       StatusBar.setTranslucent(true);
     }
 
-    setTimeout(() => {
-      SplashScreen.hide();
-    }, 750);
+    const init = async () => {
+      await setTimeout(async () => await true, 4000);
+    };
+    init()
+      .finally(async () => {
+        await BootSplash.hide({ fade: true });
+      })
+      .catch((err) => err);
   }, [scheme, isDarkMode]);
 
-  return (
-    <>
-      <Navigation />
-    </>
-  );
+  return <Navigation />;
 };
 
 export default App;
