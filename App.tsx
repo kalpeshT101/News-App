@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { LogBox, StatusBar, useColorScheme } from "react-native";
 import "react-native-gesture-handler";
+import BackgroundFetch from "react-native-background-fetch";
 import BootSplash from "react-native-bootsplash";
 import { isAndroid } from "@freakycoder/react-native-helpers";
+import { fetchAndStore } from "@services/background";
+import { storage } from "@services/storage";
 /**
  * ? Local Imports
  */
@@ -14,7 +17,39 @@ const App = () => {
   const scheme = useColorScheme();
   const isDarkMode = scheme === "dark";
 
-  React.useEffect(() => {
+  const initBackgroundFetch = async () => {
+    await BackgroundFetch.configure(
+      {
+        minimumFetchInterval: 15,
+        stopOnTerminate: false,
+        enableHeadless: true,
+        startOnBoot: true,
+        forceAlarmManager: false,
+      },
+      async (taskId: string) => {
+        await fetchAndStore();
+        BackgroundFetch.finish(taskId);
+      },
+      (taskId: string) => {
+        console.log("[Fetch] TIMEOUT taskId:", taskId);
+        BackgroundFetch.finish(taskId);
+      },
+    );
+
+    BackgroundFetch.scheduleTask({
+      taskId: "com.foo.customtask",
+      delay: 5000, // milliseconds
+      forceAlarmManager: true,
+      periodic: false,
+      stopOnTerminate: false,
+    });
+  };
+
+  useEffect(() => {
+    initBackgroundFetch();
+  }, []);
+
+  useEffect(() => {
     StatusBar.setBarStyle(isDarkMode ? "light-content" : "dark-content");
     if (isAndroid) {
       StatusBar.setBackgroundColor("rgba(0,0,0,0)");
