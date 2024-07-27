@@ -1,24 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  LayoutAnimation,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import LinearGradient from "react-native-linear-gradient";
+import { LayoutAnimation, StatusBar, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { createShimmerPlaceholder } from "react-native-shimmer-placeholder";
 // @ts-ignore
 import SwipeableFlatList from "react-native-swipeable-list";
 import { colorEmphasis, darkColors } from "utils";
 import { useFetch } from "@services/backgroundTask";
 import { storage } from "@services/storage";
 import Header from "./components/Header";
+import Loader from "./components/Loader";
 import NewsItem from "./components/NewsItem";
 import QuickActions from "./components/QuickActions";
 
-const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient);
 function renderItemSeparator() {
   return <View style={styles.itemSeparator} />;
 }
@@ -39,54 +31,43 @@ const HomeScreen = () => {
   const timerRef = useRef<any>();
   const [scrollRef, setScrollRef] = useState(false);
 
+  const fetchRandomNews = useCallback(() => {
+    const randomNews: any = [];
+    const localData = storageNewsData;
+    const localStorageData = JSON.parse(storage.getString("newsData")!);
+
+    for (let i = 0; i < 5; i++) {
+      const index = Math.floor(Math.random() * localData.length);
+      randomNews.push(localData[index]);
+      localData.splice(index, 1);
+      localStorageData.splice(index, 1);
+    }
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setStorageNewsData(localData);
+    setCurrentData([...randomNews, ...currentData]);
+    storage.set("newsData", JSON.stringify(localStorageData));
+  }, [storageNewsData, currentData]);
+
   const startTimer = useCallback(() => {
     timerRef.current = setInterval(() => {
       if (storageNewsData.length === 0) {
         clearInterval(timerRef.current);
-        fetchNews();
+        fetchNewsManually();
         return;
+      } else {
+        fetchRandomNews();
       }
-      const randomNews: any = [];
-      const localData = storageNewsData;
-      const localStorageData = JSON.parse(storage.getString("newsData")!);
-
-      for (let i = 0; i < 5; i++) {
-        const index = Math.floor(Math.random() * localData.length);
-        randomNews.push(localData[index]);
-        localData.splice(index, 1);
-        localStorageData.splice(index, 1);
-      }
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      storage.set("newsData", JSON.stringify(localStorageData));
-      setStorageNewsData(localData);
-      setCurrentData([...randomNews, ...currentData]);
     }, 10000);
-    //
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentData, storageNewsData]);
 
-  const fetchNews = useCallback(async () => {
+  const fetchNewsManually = useCallback(async () => {
     clearInterval(timerRef.current);
     if (storageNewsData.length === 0) {
       storage.clearAll();
       await fetchData();
     } else {
-      const randomNews: any = [];
-      const localData = storageNewsData;
-      const localStorageData = JSON.parse(storage.getString("newsData")!);
-
-      for (let i = 0; i < 5; i++) {
-        const index = Math.floor(Math.random() * localData.length);
-        randomNews.push(localData[index]);
-        localData.splice(index, 1);
-        localStorageData.splice(index, 1);
-      }
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setStorageNewsData(localData);
-      storage.set("newsData", JSON.stringify(localStorageData));
-      setCurrentData([...randomNews, ...currentData]);
+      fetchRandomNews();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentData, storageNewsData]);
 
   useEffect(() => {
@@ -113,13 +94,16 @@ const HomeScreen = () => {
 
   const deleteItem = (itemId: any) => {
     if (currentData.length < 5) {
-      fetchNews();
+      fetchNewsManually();
     } else {
       const newState = [...currentData];
       const filteredState = newState.filter((item: any) => item.id !== itemId);
       setCurrentData(filteredState);
+      const localStorageData = JSON.parse(storage.getString("newsData")!);
+      const id = localStorageData.findIndex((news: any) => news.id === itemId);
+      localStorageData.splice(id, 1);
+      storage.set("newsData", JSON.stringify(localStorageData));
     }
-
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
 
@@ -131,45 +115,12 @@ const HomeScreen = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
 
-  if (!currentData || isPending)
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContatiner}>
-          <Text style={styles.headerText}>News Feed</Text>
-          {Array(10)
-            .fill("")
-            .map((_, idx) => (
-              <View style={styles.shimmerContainer} key={idx}>
-                <View style={{ gap: 10 }}>
-                  <ShimmerPlaceholder
-                    style={styles.shimmer}
-                    width={200}
-                    height={50}
-                    shimmerColors={["#3a3a3a", "#4a4a4a", "#3a3a3a"]}
-                  />
-                  <ShimmerPlaceholder
-                    style={styles.shimmer}
-                    width={50}
-                    height={10}
-                    shimmerColors={["#3a3a3a", "#4a4a4a", "#3a3a3a"]}
-                  />
-                </View>
-                <ShimmerPlaceholder
-                  style={styles.shimmer}
-                  width={60}
-                  height={60}
-                  shimmerColors={["#3a3a3a", "#4a4a4a", "#3a3a3a"]}
-                />
-              </View>
-            ))}
-        </View>
-      </SafeAreaView>
-    );
+  if (!currentData || isPending) return <Loader />;
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <Header pinnedNews={pinnedNews} fetchNews={fetchNews} />
+      <Header pinnedNews={pinnedNews} fetchNews={fetchNewsManually} />
       <View style={styles.container}>
         <SwipeableFlatList
           keyExtractor={(item: any) => item.id.toString()}
@@ -192,29 +143,6 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  loadingContatiner: {
-    paddingHorizontal: 10,
-    paddingTop: 20,
-    flex: 1,
-    gap: 10,
-  },
-  shimmerContainer: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 10,
-  },
-  shimmer: {
-    borderRadius: 8,
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: "800",
-    textAlign: "center",
-    color: darkColors.onBackground,
-    opacity: colorEmphasis.high,
-  },
   container: {
     backgroundColor: "#121212",
     flex: 1,
