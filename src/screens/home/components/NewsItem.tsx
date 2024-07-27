@@ -1,4 +1,4 @@
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { Image, Platform, StyleSheet, Text, View } from "react-native";
 import Animated, { FadeInUp } from "react-native-reanimated";
 
 const darkColors = {
@@ -23,18 +23,16 @@ const NewsItem = ({ item }: { item: any }) => {
       style={styles.item}
       entering={Platform.OS === "android" ? FadeInUp : undefined}
     >
-      <View style={styles.avatar} />
       <View style={styles.messageContainer}>
-        <Text style={styles.name} numberOfLines={1}>
-          {item.author ?? ""}
-        </Text>
-        <Text style={styles.subject} numberOfLines={1}>
-          {item.content}
-        </Text>
-        <Text style={styles.text} numberOfLines={2}>
-          {item.description}
-        </Text>
+        <Text style={styles.text}>{item.title}</Text>
+        <Text style={styles.name}>{item.author ?? ""}</Text>
       </View>
+      <Image
+        style={styles.avatar}
+        source={{
+          uri: item.urlToImage ?? "https://reactnative.dev/img/tiny_logo.png",
+        }}
+      />
     </Animated.View>
   );
 };
@@ -42,48 +40,35 @@ const NewsItem = ({ item }: { item: any }) => {
 const styles = StyleSheet.create({
   item: {
     backgroundColor: "#121212",
-    height: 80,
     flexDirection: "row",
     padding: 10,
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   messageContainer: {
     backgroundColor: darkColors.background,
-    maxWidth: 300,
+    flexShrink: 1,
   },
   name: {
-    fontSize: 16,
+    fontSize: 14,
     color: darkColors.primary,
     opacity: colorEmphasis.high,
-    fontWeight: "800",
-  },
-  subject: {
-    fontSize: 14,
-    color: darkColors.onBackground,
-    opacity: colorEmphasis.high,
-    fontWeight: "bold",
-    textShadowColor: darkColors.secondary,
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 4,
+    fontWeight: "600",
+    paddingTop: 4,
   },
   text: {
-    fontSize: 10,
+    fontSize: 16,
     color: darkColors.onBackground,
     opacity: colorEmphasis.medium,
+    fontWeight: "500",
   },
   avatar: {
-    width: 40,
-    height: 40,
-    backgroundColor: darkColors.onBackground,
-    opacity: colorEmphasis.high,
-    borderColor: darkColors.primary,
-    borderWidth: 1,
-    borderRadius: 20,
-    marginRight: 7,
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginHorizontal: 10,
     alignSelf: "center",
-    shadowColor: darkColors.secondary,
-    shadowOffset: { width: 1, height: 1 },
-    shadowRadius: 2,
-    shadowOpacity: colorEmphasis.high,
+    overflow: "hidden",
   },
 });
 

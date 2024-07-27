@@ -53,7 +53,7 @@ const HomeScreen = () => {
     fetchData,
   } = useFetch(
     // eslint-disable-next-line max-len
-    "https://newsapi.org/v2/everything?page=1&pageSize=20&domains=bbc.co.uk,techcrunch.com,engadget.com&apiKey=8d8e62acd6c248109eafe31fef011b3e",
+    "https://newsapi.org/v2/everything?q=india&from=2024-06-27&sortBy=publishedAt&apiKey=8d8e62acd6c248109eafe31fef011b3e&page=1&pageSize=100",
   );
 
   const [datas, setDatas] = useState(newsData || []);
@@ -197,11 +197,8 @@ const HomeScreen = () => {
       </ScrollView>
       <Animated.View style={styles.scrollTopButton} entering={FadeInDown}>
         <Pressable
-          onPress={async () => {
-            // storage.clearAll();
-            // await fetchData();
-            ref?.current?.scrollTo({ x: 0, y: 0, animated: true });
-          }}
+          hitSlop={4}
+          onPress={() => ref?.current?.scrollTo({ x: 0, y: 0, animated: true })}
         >
           <ArrowUp />
         </Pressable>
@@ -231,7 +228,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     justifyContent: "center",
     alignItems: "center",
-    paddingTop: 20,
+    paddingVertical: 20,
     flexDirection: "row",
     position: "relative",
   },
