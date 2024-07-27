@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
-import Animated from "react-native-reanimated";
+import { Platform, StyleSheet, Text, View } from "react-native";
+import Animated, { FadeInUp } from "react-native-reanimated";
 
 const darkColors = {
   background: "#121212",
@@ -18,7 +18,11 @@ const colorEmphasis = {
 
 const NewsItem = ({ item }: { item: any }) => {
   return (
-    <Animated.View style={styles.item}>
+    <Animated.View
+      key={item.id}
+      style={styles.item}
+      entering={Platform.OS === "android" ? FadeInUp : undefined}
+    >
       <View style={styles.avatar} />
       <View style={styles.messageContainer}>
         <Text style={styles.name} numberOfLines={1}>

@@ -11,7 +11,6 @@ export const fetchAndStore = async () => {
       var ids = "id" + Math.random().toString(16).slice(2)
       news.id = ids;
     })
-    console.log(json.articles)
     storage.set("newsData", JSON.stringify(json.articles));
   } catch (error) {
     console.log(`${error} Could not Fetch Data `);
