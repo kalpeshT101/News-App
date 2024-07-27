@@ -33,7 +33,7 @@ const HomeScreen = () => {
     "https://newsapi.org/v2/everything?q=india&from=2024-06-27&sortBy=publishedAt&apiKey=8d8e62acd6c248109eafe31fef011b3e&page=1&pageSize=100",
   );
 
-  const [datas, setDatas] = useState(newsData || []);
+  const [storageNewsData, setStorageNewsData] = useState(newsData || []);
   const [currentData, setCurrentData] = useState<any>([]);
   const [pinnedNews, setPinnedNews] = useState<any>(null);
   const timerRef = useRef<any>();
@@ -41,63 +41,69 @@ const HomeScreen = () => {
 
   const startTimer = useCallback(() => {
     timerRef.current = setInterval(() => {
-      if (datas.length === 0) {
+      if (storageNewsData.length === 0) {
         clearInterval(timerRef.current);
         fetchNews();
         return;
       }
       const randomNews: any = [];
-      const localData = datas;
+      const localData = storageNewsData;
+      const localStorageData = JSON.parse(storage.getString("newsData")!);
 
       for (let i = 0; i < 5; i++) {
         const index = Math.floor(Math.random() * localData.length);
         randomNews.push(localData[index]);
         localData.splice(index, 1);
+        localStorageData.splice(index, 1);
       }
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setDatas(localData);
+      storage.set("newsData", JSON.stringify(localStorageData));
+      setStorageNewsData(localData);
       setCurrentData([...randomNews, ...currentData]);
     }, 10000);
     //
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentData, datas]);
+  }, [currentData, storageNewsData]);
 
   const fetchNews = useCallback(async () => {
     clearInterval(timerRef.current);
-    if (datas.length === 0) {
+    if (storageNewsData.length === 0) {
       storage.clearAll();
       await fetchData();
     } else {
       const randomNews: any = [];
-      const localData = datas;
+      const localData = storageNewsData;
+      const localStorageData = JSON.parse(storage.getString("newsData")!);
 
       for (let i = 0; i < 5; i++) {
         const index = Math.floor(Math.random() * localData.length);
         randomNews.push(localData[index]);
         localData.splice(index, 1);
+        localStorageData.splice(index, 1);
       }
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setDatas(localData);
+      setStorageNewsData(localData);
+      storage.set("newsData", JSON.stringify(localStorageData));
       setCurrentData([...randomNews, ...currentData]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentData, datas]);
+  }, [currentData, storageNewsData]);
 
   useEffect(() => {
     if (newsData) {
-      setDatas(newsData);
+      setStorageNewsData(newsData);
       setCurrentData((newsData as any).splice(0, 10));
     }
   }, [newsData]);
 
   useEffect(() => {
-    if (datas) {
+    if (storageNewsData) {
       clearInterval(timerRef.current);
       startTimer();
     }
 
     return () => clearInterval(timerRef.current);
-  }, [datas, startTimer, fetchData]);
+  }, [storageNewsData, startTimer, fetchData]);
 
   useEffect(() => {
     if (scrollRef) {
