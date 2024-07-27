@@ -36,13 +36,14 @@ const App = () => {
       },
     );
 
-    BackgroundFetch.scheduleTask({
-      taskId: "com.foo.customtask",
-      delay: 5000, // milliseconds
-      forceAlarmManager: true,
-      periodic: false,
-      stopOnTerminate: false,
-    });
+    // uncomment to simulate background task execution in less time
+    // BackgroundFetch.scheduleTask({
+    //   taskId: "com.foo.customtask",
+    //   delay: 5000, // milliseconds
+    //   forceAlarmManager: true,
+    //   periodic: false,
+    //   stopOnTerminate: false,
+    // });
   };
 
   useEffect(() => {

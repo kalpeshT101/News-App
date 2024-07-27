@@ -30,7 +30,7 @@ const NewsItem = ({ item }: { item: any }) => {
       <Image
         style={styles.avatar}
         source={{
-          uri: item.urlToImage ?? "https://reactnative.dev/img/tiny_logo.png",
+          uri: item.urlToImage || "https://reactnative.dev/img/tiny_logo.png",
         }}
       />
     </Animated.View>
