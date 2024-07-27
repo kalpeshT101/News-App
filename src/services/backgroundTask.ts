@@ -1,10 +1,9 @@
+import { NEWS_API_URL } from "utils";
 import { storage } from "./storage";
 
 export const fetchAndStore = async () => {
   try {
-    const response = await fetch(
-    "https://newsapi.org/v2/everything?page=1&pageSize=20&domains=bbc.co.uk,techcrunch.com,engadget.com&apiKey=8d8e62acd6c248109eafe31fef011b3e",
-    );
+    const response = await fetch(NEWS_API_URL);
     if (!response.ok) throw new Error(response.statusText);
     const json = await response.json();
     json.articles.map((news: any) => {

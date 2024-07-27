@@ -4,7 +4,7 @@ import "react-native-gesture-handler";
 import BackgroundFetch from "react-native-background-fetch";
 import BootSplash from "react-native-bootsplash";
 import { isAndroid } from "@freakycoder/react-native-helpers";
-import { fetchAndStore } from "@services/background";
+import { fetchAndStore } from "@services/backgroundTask";
 /**
  * ? Local Imports
  */

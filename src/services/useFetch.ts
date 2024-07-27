@@ -1,30 +1,26 @@
 import { useEffect, useState } from "react";
 import { storage } from "./storage";
-import { v4 as uuid } from 'uuid'
+import { addUniqueId } from "utils";
 
-export const useFetch = (url) => {
+export const useFetch = (url : string) => {
   const [data, setData] = useState(null);
   const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<any>(null);
 
   const fetchData = async () => {
     const storedData = storage.getString("newsData");
     if (storedData && JSON.parse(storedData).length > 0) {
-      const d = JSON.parse(storedData)
-      setData(d)
+      setData(JSON.parse(storedData))
     } else {
       setIsPending(true);
       try {
         const response = await fetch(url);
         if (!response.ok) throw new Error(response.statusText);
-        const json = await response.json();
+        const res = await response.json();
         setIsPending(false);
-        json.articles.map(news => {
-          var ids = "id" + Math.random().toString(16).slice(2)
-          news.id = ids;
-        })
-        setData(json.articles);
-        storage.set("newsData", JSON.stringify(json.articles));
+        const data = addUniqueId(res.articles)
+        setData(data);
+        storage.set("newsData", JSON.stringify(data));
         setError(null);
       } catch (error) {
         setError(`${error} Could not Fetch Data `);
@@ -36,5 +32,6 @@ export const useFetch = (url) => {
   useEffect(() => {
     fetchData();
   }, [url]);
+
   return { fetchData, data, isPending, error };
 };
