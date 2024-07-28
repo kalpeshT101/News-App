@@ -61,8 +61,8 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   avatar: {
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 80,
     borderRadius: 8,
     marginHorizontal: 10,
     alignSelf: "center",
