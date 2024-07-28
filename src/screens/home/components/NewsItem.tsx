@@ -50,12 +50,14 @@ const styles = StyleSheet.create({
     color: darkColors.primary,
     opacity: colorEmphasis.high,
     fontWeight: "600",
+    fontFamily: "Montserrat-Black",
     paddingTop: 4,
   },
   text: {
     fontSize: 16,
     color: darkColors.onBackground,
     opacity: colorEmphasis.medium,
+    fontFamily: "Montserrat-Black",
     fontWeight: "500",
   },
   avatar: {

@@ -69,6 +69,8 @@ const styles = StyleSheet.create({
   },
   pinText: {
     color: darkColors.onBackground,
+    fontFamily: "Montserrat-Black",
+    fontWeight: "500",
   },
   headerText: {
     fontSize: 24,
@@ -76,6 +78,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: darkColors.onBackground,
     opacity: colorEmphasis.high,
+    fontFamily: "Montserrat-Black",
   },
   logo: {
     width: 24,

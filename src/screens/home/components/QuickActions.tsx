@@ -39,19 +39,24 @@ const styles = StyleSheet.create({
     width: 80,
     alignItems: "center",
     justifyContent: "center",
+    fontFamily: "Montserrat-Black",
   },
   buttonText: {
-    fontWeight: "bold",
+    fontWeight: "600",
     opacity: colorEmphasis.high,
+    fontFamily: "Montserrat-Black",
   },
   button1Text: {
     color: darkColors.primary,
+    fontFamily: "Montserrat-Black",
   },
   button2Text: {
     color: darkColors.secondary,
+    fontFamily: "Montserrat-Black",
   },
   button3Text: {
     color: darkColors.error,
+    fontFamily: "Montserrat-Black",
   },
   contentContainerStyle: {
     flexGrow: 1,

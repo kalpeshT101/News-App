@@ -89,6 +89,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: darkColors.onBackground,
     opacity: colorEmphasis.high,
+    fontFamily: "Montserrat-Black",
   },
 });
 
