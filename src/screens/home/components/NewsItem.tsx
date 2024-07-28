@@ -1,5 +1,5 @@
-import { Image, Platform, StyleSheet, Text, View } from "react-native";
-import Animated, { FadeInUp } from "react-native-reanimated";
+import { Image, StyleSheet, Text, View } from "react-native";
+import Animated from "react-native-reanimated";
 
 const darkColors = {
   background: "#121212",

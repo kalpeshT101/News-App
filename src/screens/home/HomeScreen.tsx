@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useReducer, useRef } from "react";
 import {
   LayoutAnimation,
   Platform,
@@ -53,8 +47,6 @@ const HomeScreen = () => {
   );
 
   const timerRef = useRef<any>();
-  const [isScrolling, setIsScrolling] = useState(false);
-  const listRef = useRef<any>(null);
 
   const deleteItem = (itemId: any) => {
     if (currentData.length < 5) {
@@ -165,12 +157,6 @@ const HomeScreen = () => {
     return () => clearInterval(timerRef.current);
   }, [storageNewsData, startTimer]);
 
-  useEffect(() => {
-    if (isScrolling) {
-      clearInterval(timerRef.current);
-    }
-  }, [isScrolling]);
-
   const renderNewsItem = useCallback(({ item }: { item: any }) => {
     return <NewsItem item={item} />;
   }, []);
@@ -197,9 +183,6 @@ const HomeScreen = () => {
           contentContainerStyle={styles.contentContainerStyle}
           shouldBounceOnMount={true}
           ItemSeparatorComponent={renderItemSeparator}
-          onMomentumScrollBegin={() => setIsScrolling(true)}
-          onMomentumScrollEnd={() => setIsScrolling(false)}
-          ref={listRef}
           initialNumToRender={10}
         />
       </View>
