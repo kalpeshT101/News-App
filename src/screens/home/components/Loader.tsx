@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StatusBar, StyleSheet, Text, View } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { createShimmerPlaceholder } from "react-native-shimmer-placeholder";
@@ -10,6 +10,7 @@ const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient);
 const Loader = () => {
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
       <View style={styles.loadingContatiner}>
         <Text style={styles.headerText}>News Feed</Text>
         {Array(10)

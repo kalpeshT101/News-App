@@ -10,6 +10,7 @@ import {
   Platform,
   StatusBar,
   StyleSheet,
+  UIManager,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,6 +29,12 @@ const renderItemSeparator = () => {
   return <View style={styles.itemSeparator} />;
 };
 
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 const HomeScreen = () => {
   const { data: newsData, isPending, fetchData } = useFetch(NEWS_API_URL);
 
@@ -59,8 +66,11 @@ const HomeScreen = () => {
       localStorageData.splice(id, 1);
       storage.set("newsData", JSON.stringify(localStorageData));
     }
-    Platform.OS === "ios" &&
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Platform.OS === "android"
+      ? LayoutAnimation.configureNext(
+          LayoutAnimation.create(200, "easeInEaseOut", "opacity"),
+        )
+      : LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
 
   const pinItem = useCallback(
@@ -74,8 +84,11 @@ const HomeScreen = () => {
         type: NewsActionsType.SET_LIST_VIEW_DATA,
         payload: filteredState,
       });
-      Platform.OS === "ios" &&
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      Platform.OS === "android"
+        ? LayoutAnimation.configureNext(
+            LayoutAnimation.create(200, "easeInEaseOut", "opacity"),
+          )
+        : LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     },
     [currentData, pinnedNews],
   );
@@ -91,9 +104,12 @@ const HomeScreen = () => {
       localData.splice(index, 1);
       localStorageData.splice(index, 1);
     }
-    Platform.OS === "ios" &&
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
+    Platform.OS === "android"
+      ? LayoutAnimation.configureNext(
+          LayoutAnimation.create(200, "easeInEaseOut", "opacity"),
+        )
+      : LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     dispatch({ type: NewsActionsType.STORE_LOCAL_DATA, payload: localData });
     dispatch({
       type: NewsActionsType.SET_LIST_VIEW_DATA,
@@ -159,7 +175,7 @@ const HomeScreen = () => {
     [pinItem, deleteItem],
   );
 
-  if (currentData.length === 0 || isPending) return <Loader />;
+  if (!currentData || isPending) return <Loader />;
 
   return (
     <SafeAreaView style={styles.container}>
