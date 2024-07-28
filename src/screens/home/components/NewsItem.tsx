@@ -18,11 +18,7 @@ const colorEmphasis = {
 
 const NewsItem = ({ item }: { item: any }) => {
   return (
-    <Animated.View
-      key={item.id}
-      style={styles.item}
-      entering={Platform.OS === "android" ? FadeInUp : undefined}
-    >
+    <Animated.View key={item.id} style={styles.item}>
       <View style={styles.messageContainer}>
         <Text style={styles.text}>{item.title}</Text>
         <Text style={styles.name}>{item.author ?? ""}</Text>

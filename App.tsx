@@ -23,10 +23,11 @@ const App = () => {
         stopOnTerminate: false,
         enableHeadless: true,
         startOnBoot: true,
-        forceAlarmManager: false,
+        forceAlarmManager: true,
       },
       async (taskId: string) => {
         await fetchAndStore();
+        // console.log("fetched and stored the data");
         BackgroundFetch.finish(taskId);
       },
       (taskId: string) => {
@@ -38,9 +39,10 @@ const App = () => {
     // uncomment to simulate background task execution in less time
     // BackgroundFetch.scheduleTask({
     //   taskId: "com.foo.customtask",
-    //   delay: 5000, // milliseconds
+    //   delay: 60000, // milliseconds
     //   forceAlarmManager: true,
-    //   periodic: false,
+    //   enableHeadless: true,
+    //   periodic: true,
     //   stopOnTerminate: false,
     // });
   };

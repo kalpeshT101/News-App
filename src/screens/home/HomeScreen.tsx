@@ -5,7 +5,13 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { LayoutAnimation, StatusBar, StyleSheet, View } from "react-native";
+import {
+  LayoutAnimation,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 // @ts-ignore
 import SwipeableFlatList from "react-native-swipeable-list";
@@ -18,9 +24,9 @@ import Loader from "./components/Loader";
 import NewsItem from "./components/NewsItem";
 import QuickActions from "./components/QuickActions";
 
-function renderItemSeparator() {
+const renderItemSeparator = () => {
   return <View style={styles.itemSeparator} />;
-}
+};
 
 const HomeScreen = () => {
   const { data: newsData, isPending, fetchData } = useFetch(NEWS_API_URL);
@@ -53,7 +59,8 @@ const HomeScreen = () => {
       localStorageData.splice(id, 1);
       storage.set("newsData", JSON.stringify(localStorageData));
     }
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Platform.OS === "ios" &&
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
 
   const pinItem = useCallback(
@@ -67,7 +74,8 @@ const HomeScreen = () => {
         type: NewsActionsType.SET_LIST_VIEW_DATA,
         payload: filteredState,
       });
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      Platform.OS === "ios" &&
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     },
     [currentData, pinnedNews],
   );
@@ -83,7 +91,9 @@ const HomeScreen = () => {
       localData.splice(index, 1);
       localStorageData.splice(index, 1);
     }
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Platform.OS === "ios" &&
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
     dispatch({ type: NewsActionsType.STORE_LOCAL_DATA, payload: localData });
     dispatch({
       type: NewsActionsType.SET_LIST_VIEW_DATA,
@@ -139,7 +149,17 @@ const HomeScreen = () => {
     }
   }, [isScrolling]);
 
-  if (!currentData || isPending) return <Loader />;
+  const renderNewsItem = useCallback(({ item }: { item: any }) => {
+    return <NewsItem item={item} />;
+  }, []);
+  const renderQuickActions = useCallback(
+    ({ item }: { item: any }) => {
+      return QuickActions(item, pinItem, deleteItem);
+    },
+    [pinItem, deleteItem],
+  );
+
+  if (currentData.length === 0 || isPending) return <Loader />;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -149,17 +169,16 @@ const HomeScreen = () => {
         <SwipeableFlatList
           keyExtractor={(item: any) => item.id.toString()}
           data={currentData}
-          renderItem={({ item }: { item: any }) => <NewsItem item={item} />}
-          maxSwipeDistance={160}
-          renderQuickActions={({ item }: { item: any }) =>
-            QuickActions(item, pinItem, deleteItem)
-          }
+          renderItem={renderNewsItem}
+          maxSwipeDistance={140}
+          renderQuickActions={renderQuickActions}
           contentContainerStyle={styles.contentContainerStyle}
           shouldBounceOnMount={true}
           ItemSeparatorComponent={renderItemSeparator}
           onMomentumScrollBegin={() => setIsScrolling(true)}
           onMomentumScrollEnd={() => setIsScrolling(false)}
           ref={listRef}
+          initialNumToRender={10}
         />
       </View>
     </SafeAreaView>

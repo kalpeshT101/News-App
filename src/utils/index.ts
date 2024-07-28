@@ -6,7 +6,6 @@ export const generateRandomNumber = (min: number, max: number) => {
   return Math.floor(min + Math.random() * (max + 1 - min));
 };
 
-
 export const darkColors = {
   background: "#121212",
   primary: "#BB86FC",
@@ -22,8 +21,7 @@ export const colorEmphasis = {
   disabled: 0.38,
 };
 
-export const NEWS_API_URL = "https://newsapi.org/v2/everything?q=india&from=2024-06-27&sortBy=publishedAt&apiKey=8d8e62acd6c248109eafe31fef011b3e&page=1&pageSize=100"
-
+export const NEWS_API_URL = 'https://newsapi.org/v2/everything?q=india&from=2024-07-05&sortBy=publishedAt&apiKey=8d8e62acd6c248109eafe31fef011b3e&page=1&pageSize=100'
 
 export const addUniqueId = (obj : any) => {
   obj.map((news : any) => {

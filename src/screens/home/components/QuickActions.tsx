@@ -16,19 +16,15 @@ const colorEmphasis = {
   disabled: 0.38,
 };
 
-const QuickActions = (qaItem: any, pinItem: any, deleteItem: any) => {
+const QuickActions = (newsItem: any, pinItem: any, deleteItem: any) => {
   return (
     <View style={styles.qaContainer}>
-      <View style={[styles.button, styles.button2Text]}>
-        <Pressable onPress={() => pinItem(qaItem)}>
-          <Text style={[styles.buttonText, styles.button2Text]}>Pin</Text>
-        </Pressable>
-      </View>
-      <View style={[styles.button, styles.button3Text]}>
-        <Pressable onPress={() => deleteItem(qaItem.id)}>
-          <Text style={[styles.buttonText, styles.button3Text]}>Delete</Text>
-        </Pressable>
-      </View>
+      <Pressable style={styles.button} onPress={() => pinItem(newsItem)}>
+        <Text style={[styles.buttonText, styles.button2Text]}>Pin</Text>
+      </Pressable>
+      <Pressable style={styles.button} onPress={() => deleteItem(newsItem.id)}>
+        <Text style={[styles.buttonText, styles.button3Text]}>Delete</Text>
+      </Pressable>
     </View>
   );
 };
