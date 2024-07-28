@@ -15,7 +15,15 @@ export default function Header({
     <View style={pinnedNews ? styles.header : {}}>
       <View style={styles.headerContainer}>
         <Text style={styles.headerText}>News Feed</Text>
-        <Pressable style={styles.fetch} onPress={fetchNews}>
+        <Pressable
+          onPress={fetchNews}
+          style={({ pressed }) => [
+            {
+              backgroundColor: pressed ? "#A9A9A9" : "black",
+            },
+            styles.fetch,
+          ]}
+        >
           <Fetch />
         </Pressable>
       </View>
@@ -40,6 +48,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 25,
     top: 25,
+    borderRadius: 999,
+    padding: 2,
   },
   headerText: {
     fontSize: 24,

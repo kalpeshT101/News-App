@@ -16,7 +16,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 // @ts-ignore
 import SwipeableFlatList from "react-native-swipeable-list";
-import { colorEmphasis, darkColors, NEWS_API_URL } from "utils";
+import {
+  colorEmphasis,
+  darkColors,
+  NEWS_API_URL,
+  randomIntFromInterval,
+} from "utils";
 import { NewsActionsType, newsReducer } from "@services/newsReducer";
 import { storage } from "@services/storage";
 import { useFetch } from "@services/useFetch";
@@ -97,8 +102,9 @@ const HomeScreen = () => {
     const randomNews: any = [];
     const localData = storageNewsData;
     const localStorageData = JSON.parse(storage.getString("newsData")!);
+    const randomNewsCount = randomIntFromInterval(1, 5);
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < randomNewsCount; i++) {
       const index = Math.floor(Math.random() * localData.length);
       randomNews.push(localData[index]);
       localData.splice(index, 1);
@@ -157,7 +163,7 @@ const HomeScreen = () => {
       startTimer();
     }
     return () => clearInterval(timerRef.current);
-  }, [storageNewsData, startTimer, fetchData]);
+  }, [storageNewsData, startTimer]);
 
   useEffect(() => {
     if (isScrolling) {
