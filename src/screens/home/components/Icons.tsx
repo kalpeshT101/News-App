@@ -1,4 +1,4 @@
-import { Path, Svg } from "react-native-svg";
+import { Circle, Path, Svg } from "react-native-svg";
 
 export const ArrowUp = () => (
   <Svg width={16} height={16} fill="#fff" stroke="#fff" viewBox="0 0 330 330">
@@ -15,3 +15,21 @@ export const Fetch = () => (
     />
   </Svg>
 );
+
+export const Pin = () => {
+  return (
+    <Svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#fff"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Circle cx={11.5} cy={8.5} r={5.5} />
+      <Path d="M11.5 14v7" />
+    </Svg>
+  );
+};

@@ -1,7 +1,7 @@
 import React from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { colorEmphasis, darkColors } from "utils";
-import { Fetch } from "./Icons";
+import { Fetch, Pin } from "./Icons";
 import NewsItem from "./NewsItem";
 
 export default function Header({
@@ -31,7 +31,16 @@ export default function Header({
           <Fetch />
         </Pressable>
       </View>
-      {pinnedNews ? <NewsItem item={pinnedNews} /> : null}
+      {pinnedNews ? (
+        <View>
+          <View style={styles.pinItem}>
+            <Pin />
+            <Text style={styles.pinText}>Pinned News</Text>
+          </View>
+
+          <NewsItem item={pinnedNews} />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -51,6 +60,15 @@ const styles = StyleSheet.create({
   fetch: {
     borderRadius: 999,
     padding: 2,
+  },
+  pinItem: {
+    flexDirection: "row",
+    gap: 2,
+    paddingHorizontal: 10,
+    alignItems: "center",
+  },
+  pinText: {
+    color: darkColors.onBackground,
   },
   headerText: {
     fontSize: 24,
