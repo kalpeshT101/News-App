@@ -26,7 +26,7 @@ export const newsReducer = (state: any, action: NewsActions) => {
     case "SET_LIST_VIEW_DATA": {
       return {
         ...state,
-        currentData: action.payload,
+        currentData: action.payload.filter(news => news !== undefined),
       };
     }
   }
